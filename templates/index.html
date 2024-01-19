@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TSC Time stream</title>
+    <link rel="stylesheet" href="../static/main.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            function refreshData() {
+                $.ajax({
+                    type: "GET",
+                    url: "/get_data",
+                    success: function(response){
+                        $("#dynamicData").text(response.data);
+                    }
+                });
+            }
+
+            setInterval(refreshData, 1000); // Frissítés minden másodpercben
+        });
+
+
+        let counts = false;
+        let counts2 = false;
+
+        function inv(){
+            if (counts2){
+                document.getElementById('htimebutton').innerHTML = 'Start';
+                counts2 = !counts2;
+                htime(counts2)
+            }
+            document.getElementById('htimebutton').innerHTML = 'Start';
+            counts = !counts;
+            if (counts){
+                document.getElementById('ftimebutton').innerHTML = 'Stop';
+            }else{
+                document.getElementById('ftimebutton').innerHTML = 'Start';
+            }
+            ftime(counts)
+        }
+        function inv2(){
+            if (counts){
+                document.getElementById('ftimebutton').innerHTML = 'Start';
+                counts = !counts;
+                ftime(counts)
+            }
+            document.getElementById('ftimebutton').innerHTML = 'Start';
+            counts2 = !counts2;
+            if (counts2){
+                document.getElementById('htimebutton').innerHTML = 'Stop';
+            }else{
+                document.getElementById('htimebutton').innerHTML = 'Start';
+            }
+
+            htime(counts2)
+        }
+
+        function ftime(counts) {
+          fetch('/ftime', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: counts }),
+          })
+          .then(response => response.json())
+          .then(data => {
+               console.log(data)
+          })
+          .catch(error => {
+            console.error('Hiba történt:', error);
+          });
+        }
+
+        function htime(counts) {
+          fetch('/htime', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: counts }),
+          })
+          .then(response => response.json())
+          .then(data => {
+               console.log(data)
+          })
+          .catch(error => {
+            console.error('Hiba történt:', error);
+          });
+        }
+
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Start first half counting</h1>
+        <button id = 'ftimebutton' type="button" onclick="inv()">Start</button>
+
+        <h1>Start second half counting</h1>
+        <button id = 'htimebutton'type="button" onclick="inv2()" >Start</button>
+        <p id="dynamicData">{{ data }}</p>
+    </div>
+</body>
+
+</html>
